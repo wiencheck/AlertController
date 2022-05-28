@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "AWUtils-iOS",
+        "repositoryURL": "https://github.com/wiencheck/AWUtils-iOS",
+        "state": {
+          "branch": null,
+          "revision": "9892d7be7b454f103c4043bfe9391b65d776d092",
+          "version": "0.0.1"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
