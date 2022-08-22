@@ -2,12 +2,12 @@
   "object": {
     "pins": [
       {
-        "package": "AWUtils-iOS",
-        "repositoryURL": "https://github.com/wiencheck/AWUtils-iOS",
+        "package": "OverlayPresentable",
+        "repositoryURL": "https://github.com/wiencheck/OverlayPresentable",
         "state": {
           "branch": null,
-          "revision": "9892d7be7b454f103c4043bfe9391b65d776d092",
-          "version": "0.0.1"
+          "revision": "75a13a9c84d799cdd1437be3cef09c580cb779fe",
+          "version": "0.0.2"
         }
       }
     ]

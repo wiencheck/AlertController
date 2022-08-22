@@ -8,7 +8,7 @@
 
 import UIKit
 import Combine
-import AWUtils_iOS
+import OverlayPresentable
 
 public class AlertController: UIAlertController, OverlayPresentable {
 
@@ -16,28 +16,11 @@ public class AlertController: UIAlertController, OverlayPresentable {
     public var onDisappear: ((AlertController) -> Void)?
 
     public weak var window: UIWindow?
-    
-    private lazy var onDisappearSubject: PassthroughSubject<Void, Never> = .init()
-
+        
     public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         cleanupAfterPresentation()
-        onDisappearSubject.send()
         onDisappear?(self)
-    }
-    
-    public var onDisappearPublisher: AnyPublisher<Void, Never> {
-        onDisappearSubject.eraseToAnyPublisher()
-    }
-    
-    public var textFieldInputDidChangePublisher: AnyPublisher<UITextField, Never> {
-        NotificationCenter.default
-            .publisher(for: UITextField.textDidChangeNotification)
-            .compactMap { $0.object as? UITextField }
-            .filter { [weak self] in
-                self?.textFields?.contains($0) == true
-            }
-            .eraseToAnyPublisher()
     }
     
     public var contentViewController: UIViewController? {
@@ -62,4 +45,19 @@ public class AlertController: UIAlertController, OverlayPresentable {
             self?.onTextFieldChange?(textField)
         }
     }
+}
+
+@available(iOS 13.0, *)
+public extension AlertController {
+    
+    var textFieldInputDidChangePublisher: AnyPublisher<UITextField, Never> {
+        NotificationCenter.default
+            .publisher(for: UITextField.textDidChangeNotification)
+            .compactMap { $0.object as? UITextField }
+            .filter { [weak self] in
+                self?.textFields?.contains($0) == true
+            }
+            .eraseToAnyPublisher()
+    }
+    
 }
