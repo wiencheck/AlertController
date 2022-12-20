@@ -16,11 +16,44 @@ public class AlertController: UIAlertController, OverlayPresentable {
     public var onDisappear: ((AlertController) -> Void)?
 
     public weak var window: UIWindow?
+    
+    private var selectedActionSubject: CurrentValueSubject<UIAlertAction?, Never> = .init(nil)
+    private var selectedActionContinuation: CheckedContinuation<UIAlertAction?, Never>?
+    private var selectedActionCancellable: AnyCancellable?
+    
+    public override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        selectedActionCancellable = NotificationCenter.default.publisher(for: actionSelectedNotification,
+                                                                         object: self)
+            .sink { [weak self] in
+                let action = $0.userInfo?["action"] as? UIAlertAction
+                self?.handleAction(action)
+            }
+    }
         
     public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         cleanupAfterPresentation()
         onDisappear?(self)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            self.handleAction(nil)
+        }
+    }
+    
+    /**
+     Async getter to obtain information about selected action from the alert.
+     */
+    public var selectedAction: UIAlertAction? {
+        get async {
+            return await withCheckedContinuation { continuation in
+                self.selectedActionContinuation = continuation
+            }
+        }
+    }
+    
+    public var selectedActionPublisher: AnyPublisher<UIAlertAction?, Never> {
+        selectedActionSubject.first().eraseToAnyPublisher()
     }
     
     public var contentViewController: UIViewController? {
@@ -45,6 +78,20 @@ public class AlertController: UIAlertController, OverlayPresentable {
             self?.onTextFieldChange?(textField)
         }
     }
+}
+
+private extension AlertController {
+    
+    func handleAction(_ action: UIAlertAction?) {
+        guard selectedActionCancellable != nil else {
+            return
+        }
+        selectedActionCancellable = nil
+        selectedActionContinuation?.resume(returning: action)
+        selectedActionContinuation = nil
+        selectedActionSubject.send(action)
+    }
+    
 }
 
 @available(iOS 13.0, *)
