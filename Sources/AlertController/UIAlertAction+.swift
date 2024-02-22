@@ -26,11 +26,13 @@ public extension UIAlertAction {
         self.init(title: title,
                   style: style,
                   handler: { [weak alertController] in
-            NotificationCenter.default.post(name: actionSelectedNotification,
-                                            object: alertController,
-                                            userInfo: [
-                                                "action": $0
-                                            ])
+            NotificationCenter.default.post(
+                name: actionSelectedNotification,
+                object: alertController,
+                userInfo: [
+                    "action": $0
+                ]
+            )
         })
     }
     
