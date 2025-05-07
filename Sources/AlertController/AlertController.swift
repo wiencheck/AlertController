@@ -8,18 +8,19 @@
 
 import UIKit
 import Combine
-import OverlayPresentable
 
-public class AlertController: UIAlertController, OverlayPresentable {
+public final class AlertControllerWindow: UIWindow {}
+
+public class AlertController: UIAlertController {
 
     public var onTextFieldChange: ((UITextField) -> Void)?
     public var onDisappear: ((AlertController) -> Void)?
-
-    public weak var window: UIWindow?
     
     private var selectedActionSubject: CurrentValueSubject<UIAlertAction?, Never> = .init(nil)
     private var selectedActionContinuation: CheckedContinuation<UIAlertAction?, Never>?
     private var selectedActionCancellable: AnyCancellable?
+    
+    private var _window: UIWindow?
     
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,7 +35,8 @@ public class AlertController: UIAlertController, OverlayPresentable {
         
     public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        cleanupAfterPresentation()
+        
+        _window = nil
         onDisappear?(self)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
             self.handleAction(nil)
@@ -78,6 +80,30 @@ public class AlertController: UIAlertController, OverlayPresentable {
             self?.onTextFieldChange?(textField)
         }
     }
+    
+    public func show(
+        animated: Bool = true,
+        completion: (() -> Void)? = nil
+    ) {
+        guard let scene = UIWindowScene.focused else {
+            return
+        }
+        guard _window == nil else {
+            return
+        }
+        let window = AlertControllerWindow(windowScene: scene)
+        window.tintColor = scene.keyWindow?.tintColor
+        _window = window
+        
+        window.rootViewController = ClearViewController()
+        window.makeKeyAndVisible()
+        window.rootViewController!.present(
+            self,
+            animated: animated,
+            completion: completion
+        )
+    }
+    
 }
 
 private extension AlertController {
