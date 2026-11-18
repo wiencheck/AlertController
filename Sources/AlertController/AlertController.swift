@@ -45,13 +45,19 @@ public class AlertController: UIAlertController {
         }
     }
     
-    public override func addTextField(configurationHandler: ((UITextField) -> Void)? = nil) {
+    public override func addTextField(
+        configurationHandler: ((UITextField) -> Void)? = nil
+    ) {
         super.addTextField(configurationHandler: configurationHandler)
         
         guard let lastTextField = textFields?.last else {
             return
         }
-        NotificationCenter.default.addObserver(forName: UITextField.textDidChangeNotification, object: nil, queue: nil) { [weak self, weak lastTextField] sender in
+        NotificationCenter.default.addObserver(
+            forName: UITextField.textDidChangeNotification,
+            object: nil,
+            queue: nil
+        ) { [weak self, weak lastTextField] sender in
             guard let textField = sender.object as? UITextField,
             textField === lastTextField else {
                 return
@@ -88,14 +94,8 @@ public class AlertController: UIAlertController {
         actions: [UIAlertAction] = [],
         completion: (() -> Void)? = nil
     ) -> AnyPublisher<UIAlertAction?, Never> {
-        if !actions.isEmpty {
-            assert(
-                self.actions.isEmpty,
-                "When passing array of UIAlertAction exisitng actions should be empty."
-            )
-            for action in actions {
-                addAction(action)
-            }
+        for action in actions {
+            addAction(action)
         }
         show(
             animated: animated,
@@ -115,7 +115,7 @@ public class AlertController: UIAlertController {
             actions: actions,
             completion: completion
         )
-        for await action in await publisher.values {
+        for await action in publisher.values {
             return action
         }
         return nil
